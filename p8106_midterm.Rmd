@@ -1,0 +1,18 @@
+---
+title: "P8106_midterm"
+author: "Courtney Johnson & Jaisal Amin"
+date: "March 25, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Data
+
+```{r}
+
+```
+
