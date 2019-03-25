@@ -12,7 +12,11 @@ library(tidyverse)
 
 ## Data
 
-```{r}
-
+```{r, import}
+master = read_csv("./master.csv") %>%
+  janitor::clean_names() %>%
+  mutate(sex = factor(sex, levels = c("male", "female")),
+         age = factor(age, levels = c("5-14 years", "15-24 years", "25-34 years", 
+                                      "35-54 years", "55-74 years", "75+ years")))
 ```
 
