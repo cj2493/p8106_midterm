@@ -49,7 +49,15 @@ y_test = test$suicides_100k_pop
 
 ## Fit a linear model
 
-```{r}
 
-```
+## Fit Ridge Regression
 
+## Fit Lasso Regression
+
+## Fit PCR
+
+## Fit polynomial regression
+
+## Fit smoothing splines
+
+## Fit GAM
