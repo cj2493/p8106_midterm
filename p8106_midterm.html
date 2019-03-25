@@ -218,10 +218,10 @@ $(document).ready(function () {
 ##   generation = col_character()
 ## )</code></pre>
 <pre class="r"><code>master_num = master %&gt;%
-  select(suicides_100k_pop, year, sex, age, population, hdi_for_year, gdp_for_year, gdp_per_capita) </code></pre>
-</div>
-<div id="create-x-and-y-matrices-for-modeling" class="section level2">
-<h2>Create x and y matrices for modeling</h2>
+  select(suicides_100k_pop, year, sex, age, population, hdi_for_year, gdp_for_year, gdp_per_capita)  %&gt;%
+  mutate(sex = as.numeric(sex),
+         age = as.numeric(age))</code></pre>
+<p>Here we have changed the age variable to a numerical to enable easier numerical analysis, but remember that the categories are: 1: 5-14, 2: 15-24, 3: 25-34 , 4: 35-54, 5: 55-74, 6: 75+ ## Create x and y matrices for modeling</p>
 <pre class="r"><code>ctrl1 = trainControl(method = &quot;cv&quot;, number = 10)
 
 set.seed(1)

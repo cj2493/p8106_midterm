@@ -24,10 +24,11 @@ master = read_csv("./master.csv") %>%
   select(suicides_100k_pop, everything())
 
 master_num = master %>%
-  select(suicides_100k_pop, year, sex, age, population, hdi_for_year, gdp_for_year, gdp_per_capita) 
+  select(suicides_100k_pop, year, sex, age, population, hdi_for_year, gdp_for_year, gdp_per_capita)  %>%
+  mutate(sex = as.numeric(sex),
+         age = as.numeric(age))
 ```
-
-
+Here we have changed the age variable to a numerical to enable easier numerical analysis, but remember that the categories are: 1: 5-14, 2: 15-24, 3: 25-34 , 4: 35-54, 5: 55-74, 6: 75+
 ## Create x and y matrices for modeling
 ```{r, model_matrices}
 ctrl1 = trainControl(method = "cv", number = 10)
