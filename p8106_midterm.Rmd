@@ -12,11 +12,24 @@ library(tidyverse)
 
 ## Data
 
+clean and also only keep variables that are a numerical value (only covered numerical modeling so far)
 ```{r, import}
 master = read_csv("./master.csv") %>%
   janitor::clean_names() %>%
   mutate(sex = factor(sex, levels = c("male", "female")),
          age = factor(age, levels = c("5-14 years", "15-24 years", "25-34 years", 
-                                      "35-54 years", "55-74 years", "75+ years")))
+                                      "35-54 years", "55-74 years", "75+ years"))) %>%
+  rename(prominent_gen = generation) %>%
+  select(suicides_100k_pop, everything())
+
+master_num = master %>%
+  select(suicides_100k_pop, year, sex, age, population, hdi_for_year, gdp_for_year, gdp_per_capita) 
+```
+
+
+## Create x and y matrices for modeling
+```{r, model_matrices}
+x = model.matrix(suicides_100k_pop~., master_num)[,-1]
+y = master_num$suicides_100k_pop
 ```
 

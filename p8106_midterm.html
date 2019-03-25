@@ -194,11 +194,14 @@ $(document).ready(function () {
 
 <div id="data" class="section level2">
 <h2>Data</h2>
+<p>clean and also only keep variables that are a numerical value (only covered numerical modeling so far)</p>
 <pre class="r"><code>master = read_csv(&quot;./master.csv&quot;) %&gt;%
   janitor::clean_names() %&gt;%
   mutate(sex = factor(sex, levels = c(&quot;male&quot;, &quot;female&quot;)),
          age = factor(age, levels = c(&quot;5-14 years&quot;, &quot;15-24 years&quot;, &quot;25-34 years&quot;, 
-                                      &quot;35-54 years&quot;, &quot;55-74 years&quot;, &quot;75+ years&quot;)))</code></pre>
+                                      &quot;35-54 years&quot;, &quot;55-74 years&quot;, &quot;75+ years&quot;))) %&gt;%
+  rename(prominent_gen = generation) %&gt;%
+  select(suicides_100k_pop, everything())</code></pre>
 <pre><code>## Parsed with column specification:
 ## cols(
 ##   country = col_character(),
@@ -214,6 +217,13 @@ $(document).ready(function () {
 ##   `gdp_per_capita ($)` = col_double(),
 ##   generation = col_character()
 ## )</code></pre>
+<pre class="r"><code>master_num = master %&gt;%
+  select(suicides_100k_pop, year, sex, age, population, hdi_for_year, gdp_for_year, gdp_per_capita) </code></pre>
+</div>
+<div id="create-x-and-y-matrices-for-modeling" class="section level2">
+<h2>Create x and y matrices for modeling</h2>
+<pre class="r"><code>x = model.matrix(suicides_100k_pop~., master_num)[,-1]
+y = master_num$suicides_100k_pop</code></pre>
 </div>
 
 
