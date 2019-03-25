@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(caret)
 ```
 
 ## Data
@@ -29,7 +30,26 @@ master_num = master %>%
 
 ## Create x and y matrices for modeling
 ```{r, model_matrices}
-x = model.matrix(suicides_100k_pop~., master_num)[,-1]
-y = master_num$suicides_100k_pop
+ctrl1 = trainControl(method = "cv", number = 10)
+
+set.seed(1)
+
+sample = sample.int(n = nrow(master_num), size = floor(0.75*nrow(master_num)), replace = F)
+
+train = master_num[sample,]
+test = master_num[-sample,]
+
+x_train = model.matrix(suicides_100k_pop~., train)[,-1]
+y_train = train$suicides_100k_pop
+
+x_test = model.matrix(suicides_100k_pop~., test)[,-1]
+y_test = test$suicides_100k_pop
+```
+
+
+## Fit a linear model
+
+```{r}
+
 ```
 
