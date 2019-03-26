@@ -218,10 +218,11 @@ $(document).ready(function () {
 ##   generation = col_character()
 ## )</code></pre>
 <pre class="r"><code>master_num = master %&gt;%
-  select(suicides_100k_pop, year, sex, age, population, hdi_for_year, gdp_for_year, gdp_per_capita)  %&gt;%
+  select(suicides_100k_pop, year, sex, age, population, gdp_for_year, gdp_per_capita)  %&gt;%
   mutate(sex = as.numeric(sex),
          age = as.numeric(age))</code></pre>
-<p>Here we have changed the age variable to a numerical to enable easier numerical analysis, but remember that the categories are: 1: 5-14, 2: 15-24, 3: 25-34 , 4: 35-54, 5: 55-74, 6: 75+ ## Create x and y matrices for modeling</p>
+<p>Here we have changed the age variable to a numerical to enable easier numerical analysis, but remember that the categories are: 1: 5-14, 2: 15-24, 3: 25-34 , 4: 35-54, 5: 55-74, 6: 75+</p>
+<p>Also we did not include hdi because there were NAs ## Create x and y matrices for modeling</p>
 <pre class="r"><code>ctrl1 = trainControl(method = &quot;cv&quot;, number = 10)
 
 set.seed(1)
@@ -239,12 +240,58 @@ y_test = test$suicides_100k_pop</code></pre>
 </div>
 <div id="fit-a-linear-model" class="section level2">
 <h2>Fit a linear model</h2>
+<pre class="r"><code>lm.fit = train(x_train, y_train,
+               method = &quot;lm&quot;,
+               trControl = ctrl1)
+
+predy.lm = predict(lm.fit$finalModel, newdata = data.frame(x_test))
+mean((predy.lm - y_test)^2)</code></pre>
+<pre><code>## [1] 285.0895</code></pre>
+<p>test MSE = 285.0895</p>
 </div>
 <div id="fit-ridge-regression" class="section level2">
 <h2>Fit Ridge Regression</h2>
+<pre class="r"><code>set.seed(1)
+
+ridge.fit = train(x_train, y_train,
+                  method = &quot;glmnet&quot;,
+                  tuneGrid = expand.grid(alpha = 0,
+                                         lambda = exp(seq(-1, 10, length = 100))),
+                  trControl = ctrl1)</code></pre>
+<pre><code>## Warning in nominalTrainWorkflow(x = x, y = y, wts = weights, info =
+## trainInfo, : There were missing values in resampled performance measures.</code></pre>
+<pre class="r"><code>predy.ridge = predict(ridge.fit$finalModel, newx = x_test, s = ridge.fit$bestTune$lambda, type = &quot;response&quot;)
+mean((predy.ridge - y_test)^2)</code></pre>
+<pre><code>## [1] 285.352</code></pre>
+<p>test error is 285.352</p>
 </div>
 <div id="fit-lasso-regression" class="section level2">
 <h2>Fit Lasso Regression</h2>
+<pre class="r"><code>set.seed(1)
+lasso.fit = train(x_train, y_train,
+                  method = &quot;glmnet&quot;,
+                  tuneGrid = expand.grid(alpha = 1,
+                                         lambda = exp(seq(-1, 5, length = 100))),
+                  trControl = ctrl1)</code></pre>
+<pre><code>## Warning in nominalTrainWorkflow(x = x, y = y, wts = weights, info =
+## trainInfo, : There were missing values in resampled performance measures.</code></pre>
+<pre class="r"><code>predy.lasso = predict(lasso.fit$finalModel, newx = x_test, s = lasso.fit$bestTune$lambda, type = &quot;response&quot;)
+
+coef.lasso = predict(lasso.fit$finalModel, newx = x_test, s = lasso.fit$bestTune$lambda, type = &quot;coefficients&quot;)
+
+coef.lasso</code></pre>
+<pre><code>## 7 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                            1
+## (Intercept)     1.149134e+02
+## year           -4.729076e-02
+## sex            -1.399868e+01
+## age             3.824045e+00
+## population      7.441957e-08
+## gdp_for_year    .           
+## gdp_per_capita  .</code></pre>
+<pre class="r"><code>mean((predy.lasso - y_test)^2)</code></pre>
+<pre><code>## [1] 285.7102</code></pre>
+<p>test error 285.7102, 4 nonzero coefficients and one intercept</p>
 </div>
 <div id="fit-pcr" class="section level2">
 <h2>Fit PCR</h2>
