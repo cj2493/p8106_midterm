@@ -59,6 +59,4 @@ y_test = test$suicides_100k_pop
 
 ## Fit polynomial regression
 
-## Fit smoothing splines
-
 ## Fit GAM
