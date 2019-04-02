@@ -115,7 +115,7 @@ pcr.fit = train(x, y,
 
 predy.pcr = predict(pcr.fit$finalModel, newdata = x_test, ncomp = pcr.fit$bestTune$ncomp)
 
-pcr_mse = mean((predy.pcr - y_test)^2)
+mean((predy.pcr - y_test)^2)
 ```
 
 ## Boxplot
@@ -126,8 +126,6 @@ resamp = resamples(list(linear = lm.fit,
                         lasso = lasso.fit,
                         pcr = pcr.fit))
 
-summary(resamp)
-
 bwplot(resamp, metric = "RMSE")
 ```
 
@@ -137,7 +135,7 @@ bwplot(resamp, metric = "RMSE")
 ## Fit GAM
 ```{r}
 gam.m1 = gam(suicides_100k_pop ~ year + sex + age + population + gdp_for_year + gdp_per_capita, data = master_num)
-gam.m2 = gam(suicides_100k_pop ~ year + sex + age + population + gdp_for_year + s(gdp_per_capita), data = master_num)
+gam.m2 = gam(suicides_100k_pop ~ year + sex + age + population + s(gdp_for_year) + gdp_per_capita, data = master_num)
 
 anova(gam.m1, gam.m2, test = "F")
 plot(gam.m2)
