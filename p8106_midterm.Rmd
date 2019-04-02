@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(caret)
+
 ```
 
 ## Data
@@ -58,7 +59,6 @@ featurePlot(x, y, plot = "scatter", labels = c("","Y"),
             type = c("p"), layout = c(3, 2), alpha = 0.5)
 ```
 
-
 ## Fit a linear model
 ```{r, lm}
 lm.fit = train(x_train, y_train,
@@ -106,7 +106,29 @@ test error 285.7102, 4 nonzero coefficients and one intercept
 
 ## Fit PCR
 ```{r}
+set.seed(1)
+pcr.fit = train(x, y,
+                  method = "pcr",
+                  tuneLength = 5,
+                  trControl = ctrl1,
+                  scale = TRUE)
 
+predy.pcr = predict(pcr.fit$finalModel, newdata = x_test, ncomp = pcr.fit$bestTune$ncomp)
+
+pcr_mse = mean((predy.pcr - y_test)^2)
+```
+
+## Boxplot
+
+```{r}
+resamp = resamples(list(linear = lm.fit,
+                        ridge = ridge.fit,
+                        lasso = lasso.fit,
+                        pcr = pcr.fit))
+
+summary(resamp)
+
+bwplot(resamp, metric = "RMSE")
 ```
 
 
