@@ -39,6 +39,9 @@ set.seed(1)
 
 sample = sample.int(n = nrow(master_num), size = floor(0.75*nrow(master_num)), replace = F)
 
+x = model.matrix(suicides_100k_pop ~., master_num)[,-1]
+y = master_num$suicides_100k_pop
+
 train = master_num[sample,]
 test = master_num[-sample,]
 
@@ -47,6 +50,12 @@ y_train = train$suicides_100k_pop
 
 x_test = model.matrix(suicides_100k_pop~., test)[,-1]
 y_test = test$suicides_100k_pop
+```
+
+## Exploratory analysis and visualization
+```{r}
+featurePlot(x, y, plot = "scatter", labels = c("","Y"),
+            type = c("p"), layout = c(3, 2), alpha = 0.5)
 ```
 
 
