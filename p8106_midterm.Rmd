@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(caret)
-
+library(mgcv)
 ```
 
 ## Data
@@ -135,3 +135,11 @@ bwplot(resamp, metric = "RMSE")
 ## Fit polynomial regression
 
 ## Fit GAM
+```{r}
+gam.m1 = gam(suicides_100k_pop ~ year + sex + age + population + gdp_for_year + gdp_per_capita, data = master_num)
+gam.m2 = gam(suicides_100k_pop ~ year + sex + age + population + gdp_for_year + s(gdp_per_capita), data = master_num)
+
+anova(gam.m1, gam.m2, test = "F")
+plot(gam.m2)
+```
+
