@@ -164,6 +164,30 @@ plot4 = ggplot(data = master_num, aes(x = gdp_per_capita, y = suicides_100k_pop)
   labs(title = "Polynomial, Degree = 4")
 
 plot1 + plot2 + plot3 + plot4
+
+gdp1_cv = train(suicides_100k_pop ~ gdp_per_capita,
+                data = train,
+                method = "lm",
+                trControl = ctrl1)
+
+gdp2_cv = train(suicides_100k_pop ~ poly(gdp_per_capita, 2),
+                data = train,
+                method = "lm",
+                trControl = ctrl1)
+
+gdp3_cv = train(suicides_100k_pop ~ poly(gdp_per_capita, 3),
+                data = train,
+                method = "lm",
+                trControl = ctrl1)
+
+gdp4_cv = train(suicides_100k_pop ~ poly(gdp_per_capita, 4),
+                data = train,
+                method = "lm",
+                trControl = ctrl1)
+
+resamp = resamples(list(lm1 = gdp1_cv, lm2 = gdp2_cv, lm3 = gdp3_cv, lm4 = gdp4_cv))
+
+summary(resamp)
 ```
 
 
