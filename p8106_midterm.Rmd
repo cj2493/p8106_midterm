@@ -60,7 +60,7 @@ featurePlot(x, y, plot = "scatter", labels = c("","Y"),
             type = c("p"), layout = c(3, 2), alpha = 0.5)
 hist(master_num$suicides_100k_pop)
 qqnorm(master_num$suicides_100k_pop)
-qqnorm(master_num$suicides_100k_pop)
+qqline(master_num$suicides_100k_pop)
 cor(master_num)
 pairs(master_num)
 ```
@@ -125,7 +125,7 @@ predy.pcr = predict(pcr.fit$finalModel, newdata = x_test, ncomp = pcr.fit$bestTu
 
 mean((predy.pcr - y_test)^2)
 ```
-
+285.2069
 
 
 ## Fit polynomial regression
@@ -186,8 +186,19 @@ gdp4_cv = train(suicides_100k_pop ~ poly(gdp_per_capita, 4),
 resamp = resamples(list(lm1 = gdp1_cv, lm2 = gdp2_cv, lm3 = gdp3_cv, lm4 = gdp4_cv))
 
 summary(resamp)
-```
 
+predy.gdp2 = predict(gdp2, newdata = data.frame(x_test))
+mean((predy.gdp2 - y_test)^2)
+
+predy.gdp3 = predict(gdp3, newdata = data.frame(x_test))
+mean((predy.gdp3 - y_test)^2)
+
+predy.gdp4 = predict(gdp4, newdata = data.frame(x_test))
+mean((predy.gdp4 - y_test)^2)
+```
+gdp2 MSE 390.6915
+gdp3 MSE 390.5242
+gdp4 MSe 390.5099
 
 ## Fit GAM
 ```{r, gam}
@@ -204,8 +215,11 @@ gam.fit = train(x_train, y_train,
                 trControl = ctrl1)
 gam.fit$bestTune
 gam.fit$finalModel
-```
 
+predy.gam = predict(gam.fit, newdata = data.frame(x_test))
+mean((predy.gam - y_test)^2)
+```
+278.8389
 
 ## Boxplot
 ```{r, boxplot}
@@ -213,7 +227,8 @@ resamp = resamples(list(linear = lm.fit,
                         ridge = ridge.fit,
                         lasso = lasso.fit,
                         pcr = pcr.fit,
-                        gam = gam.fit))
+                        gam = gam.fit,
+                        poly4 = gdp4_cv))
 
 bwplot(resamp, metric = "RMSE")
 ```
