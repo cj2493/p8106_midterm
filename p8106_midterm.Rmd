@@ -55,13 +55,17 @@ y_test = test$suicides_100k_pop
 ```
 
 ## Exploratory analysis and visualization
-```{r}
+```{r, eda}
 featurePlot(x, y, plot = "scatter", labels = c("","Y"),
             type = c("p"), layout = c(3, 2), alpha = 0.5)
+cor(master_num)
+pairs(master_num)
 ```
 
 ## Fit a linear model
 ```{r, lm}
+set.seed(1)
+
 lm.fit = train(x_train, y_train,
                method = "lm",
                trControl = ctrl1)
@@ -72,7 +76,7 @@ mean((predy.lm - y_test)^2)
 test MSE = 285.0895
 
 ## Fit Ridge Regression
-```{r}
+```{r, ridge}
 set.seed(1)
 
 ridge.fit = train(x_train, y_train,
@@ -87,7 +91,7 @@ mean((predy.ridge - y_test)^2)
 test error is 285.352
 
 ## Fit Lasso Regression
-```{r}
+```{r, lasso}
 set.seed(1)
 lasso.fit = train(x_train, y_train,
                   method = "glmnet",
@@ -106,7 +110,7 @@ mean((predy.lasso - y_test)^2)
 test error 285.7102, 4 nonzero coefficients and one intercept
 
 ## Fit PCR
-```{r}
+```{r, pcr}
 set.seed(1)
 pcr.fit = train(x, y,
                   method = "pcr",
@@ -119,20 +123,11 @@ predy.pcr = predict(pcr.fit$finalModel, newdata = x_test, ncomp = pcr.fit$bestTu
 mean((predy.pcr - y_test)^2)
 ```
 
-## Boxplot
-
-```{r}
-resamp = resamples(list(linear = lm.fit,
-                        ridge = ridge.fit,
-                        lasso = lasso.fit,
-                        pcr = pcr.fit))
-
-bwplot(resamp, metric = "RMSE")
-```
 
 
 ## Fit polynomial regression
-```{r}
+```{r, poly}
+set.seed(1)
 gdp1 = lm(suicides_100k_pop ~ gdp_per_capita, data = master_num)
 
 gdp2 = lm(suicides_100k_pop ~ poly(gdp_per_capita, 2), data = master_num)
@@ -192,11 +187,30 @@ summary(resamp)
 
 
 ## Fit GAM
-```{r}
+```{r, gam}
+set.seed(1)
 gam.m1 = gam(suicides_100k_pop ~ year + sex + age + population + gdp_for_year + gdp_per_capita, data = master_num)
 gam.m2 = gam(suicides_100k_pop ~ year + sex + age + population + s(gdp_for_year) + gdp_per_capita, data = master_num)
 
 anova(gam.m1, gam.m2, test = "F")
 plot(gam.m2)
+
+gam.fit = train(x_train, y_train,
+                method = "gam",
+                tuneGrid = data.frame(method = "GCV.Cp", select = c(TRUE, FALSE)),
+                trControl = ctrl1)
+gam.fit$bestTune
+gam.fit$finalModel
 ```
 
+
+## Boxplot
+```{r, boxplot}
+resamp = resamples(list(linear = lm.fit,
+                        ridge = ridge.fit,
+                        lasso = lasso.fit,
+                        pcr = pcr.fit,
+                        gam = gam.fit))
+
+bwplot(resamp, metric = "RMSE")
+```
