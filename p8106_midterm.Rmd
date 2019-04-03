@@ -131,6 +131,18 @@ bwplot(resamp, metric = "RMSE")
 
 
 ## Fit polynomial regression
+```{r}
+gdp1 = lm(suicides_100k_pop ~ gdp_per_capita, data = master_num)
+
+gdp2 = lm(suicides_100k_pop ~ poly(gdp_per_capita, 2), data = master_num)
+
+gdp3 = lm(suicides_100k_pop ~ poly(gdp_per_capita, 3), data = master_num)
+
+gdp4 = lm(suicides_100k_pop ~ poly(gdp_per_capita, 4), data = master_num)
+
+anova(gdp1, gdp2, gdp3, gdp4)
+```
+
 
 ## Fit GAM
 ```{r}
