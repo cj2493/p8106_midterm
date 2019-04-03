@@ -58,6 +58,9 @@ y_test = test$suicides_100k_pop
 ```{r, eda}
 featurePlot(x, y, plot = "scatter", labels = c("","Y"),
             type = c("p"), layout = c(3, 2), alpha = 0.5)
+hist(master_num$suicides_100k_pop)
+qqnorm(master_num$suicides_100k_pop)
+qqnorm(master_num$suicides_100k_pop)
 cor(master_num)
 pairs(master_num)
 ```
