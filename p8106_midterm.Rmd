@@ -11,6 +11,12 @@ library(tidyverse)
 library(caret)
 library(mgcv)
 library(patchwork)
+library(rpart)
+library(rpart.plot)
+library(party)
+library(randomForest)
+library(ranger)
+library(e1071)
 ```
 
 ## Data
@@ -76,7 +82,7 @@ lm.fit = train(x_train, y_train,
 predy.lm = predict(lm.fit$finalModel, newdata = data.frame(x_test))
 mean((predy.lm - y_test)^2)
 ```
-test MSE = 285.0895
+test MSE = 262.7318
 
 ## Fit Ridge Regression
 ```{r, ridge}
@@ -91,7 +97,7 @@ ridge.fit = train(x_train, y_train,
 predy.ridge = predict(ridge.fit$finalModel, newx = x_test, s = ridge.fit$bestTune$lambda, type = "response")
 mean((predy.ridge - y_test)^2)
 ```
-test error is 285.352
+test error is 263.001
 
 ## Fit Lasso Regression
 ```{r, lasso}
@@ -110,7 +116,7 @@ coef.lasso
 
 mean((predy.lasso - y_test)^2)
 ```
-test error 285.7102, 4 nonzero coefficients and one intercept
+test error 263.4252, 4 nonzero coefficients and one intercept
 
 ## Fit PCR
 ```{r, pcr}
@@ -125,7 +131,7 @@ predy.pcr = predict(pcr.fit$finalModel, newdata = x_test, ncomp = pcr.fit$bestTu
 
 mean((predy.pcr - y_test)^2)
 ```
-285.2069
+262.8632
 
 
 ## Fit GAM
@@ -147,7 +153,7 @@ gam.fit$finalModel
 predy.gam = predict(gam.fit, newdata = data.frame(x_test))
 mean((predy.gam - y_test)^2)
 ```
-278.8389
+258.2585
 
 ## KNN
 ```{r, knn}
@@ -161,7 +167,45 @@ mean((predy.gam - y_test)^2)
 
 ## Regression Trees
 ```{r, tree}
+set.seed(1)
 
+rpart.fit = train(suicides_100k_pop ~ .,
+  train,
+  method = "rpart",
+  tuneGrid = data.frame(cp = exp(seq(-6, -2, length = 20))),
+  trControl = ctrl1)
+ggplot(rpart.fit, highlight = TRUE)
+rpart.plot(rpart.fit$finalModel)
+
+set.seed(1)
+rpart2.fit = train(suicides_100k_pop~.,
+                   train,
+                   method = "rpart2",
+                   tuneGrid = data.frame(maxdepth = 1:7),
+                   trControl = ctrl1)
+ggplot(rpart2.fit, highlight = TRUE)
+rpart.plot(rpart2.fit$finalModel)
+
+set.seed(1)
+ctree.fit = train(suicides_100k_pop~.,
+                  train,
+                  method = "ctree",
+                  tuneGrid = data.frame(mincriterion = 1 - exp(seq(-6, -2, length = 20))),
+                  trControl = ctrl1)
+ggplot(ctree.fit, highlight = TRUE)
+plot(ctree.fit$finalModel)
+
+rf.grid = expand.grid(mtry = 1:2,
+                 splitrule = "variance",
+                 min.node.size = 1:2)
+set.seed(1)
+rf.fit = train(suicides_100k_pop~.,
+               train,
+               method = "ranger",
+               tuneGrid = rf.grid,
+               trControl = ctrl1)
+
+ggplot(rf.fit, highlight = TRUE)
 ```
 
 ## Support Vector Machines
