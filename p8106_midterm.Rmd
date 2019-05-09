@@ -17,6 +17,8 @@ library(party)
 library(randomForest)
 library(ranger)
 library(e1071)
+library(pdp)
+library(earth)
 ```
 
 ## Data
@@ -61,7 +63,7 @@ y_test = test$suicides_100k_pop
 ```
 
 ## Exploratory analysis and visualization
-```{r, eda}
+```{r, eda, cache = TRUE}
 featurePlot(x, y, plot = "scatter", labels = c("","Y"),
             type = c("p"), layout = c(3, 2), alpha = 0.5)
 hist(master_num$suicides_100k_pop)
@@ -85,7 +87,7 @@ mean((predy.lm - y_test)^2)
 test MSE = 262.7318
 
 ## Fit Ridge Regression
-```{r, ridge}
+```{r, ridge, cache=TRUE}
 set.seed(1)
 
 ridge.fit = train(x_train, y_train,
@@ -100,7 +102,7 @@ mean((predy.ridge - y_test)^2)
 test error is 263.001
 
 ## Fit Lasso Regression
-```{r, lasso}
+```{r, lasso, cache=TRUE}
 set.seed(1)
 lasso.fit = train(x_train, y_train,
                   method = "glmnet",
@@ -119,7 +121,7 @@ mean((predy.lasso - y_test)^2)
 test error 263.4252, 4 nonzero coefficients and one intercept
 
 ## Fit PCR
-```{r, pcr}
+```{r, pcr, cache=TRUE}
 set.seed(1)
 pcr.fit = train(x, y,
                   method = "pcr",
@@ -135,7 +137,7 @@ mean((predy.pcr - y_test)^2)
 
 
 ## Fit GAM
-```{r, gam}
+```{r, gam, cache=TRUE}
 set.seed(1)
 gam.m1 = gam(suicides_100k_pop ~ year + sex + age + population + gdp_for_year + gdp_per_capita, data = master_num)
 gam.m2 = gam(suicides_100k_pop ~ year + sex + age + population + s(gdp_for_year) + gdp_per_capita, data = master_num)
@@ -156,17 +158,43 @@ mean((predy.gam - y_test)^2)
 258.2585
 
 ## KNN
-```{r, knn}
+```{r, knn,warning=FALSE, message=FALSE, cache=TRUE}
+set.seed(1)
 
+knn.fit = train(x = train[, 2:7],
+                   y = train$suicides_100k_pop,
+                   method = "knn",
+                   preProcess = c("center", "scale"),
+                   tuneGrid = data.frame(k = seq(1, 200, by = 5)),
+                   trControl = ctrl1)
+#ggplot(knn.fit)
+
+knn_pred = predict(knn.fit, newdata = data.frame(x_test))
+mean((knn_pred - y_test)^2)
 ```
+218.36
 
 ## MARS
-```{r, mars}
+```{r, mars, warning=FALSE, cache=TRUE}
+mars_grid = expand.grid(degree = 1:2,nprune = 2:10)
 
+set.seed(1)
+mars.fit = train(x = train[, 2:7], 
+                 y = train$suicides_100k_pop,
+                 method = "earth",
+                 tuneGrid = mars_grid,
+                 trControl = ctrl1)
+
+#ggplot(mars.fit)
+
+mars_pred = predict(mars.fit, newdata = data.frame(x_test))
+mean((mars_pred - y_test)^2)
 ```
+256.40
+
 
 ## Regression Trees
-```{r, tree}
+```{r, tree, cache = TRUE}
 set.seed(1)
 
 rpart.fit = train(suicides_100k_pop ~ .,
@@ -220,7 +248,9 @@ resamp = resamples(list(linear = lm.fit,
                         ridge = ridge.fit,
                         lasso = lasso.fit,
                         pcr = pcr.fit,
-                        gam = gam.fit))
+                        gam = gam.fit,
+                        knn = knn.fit,
+                        mars = mars.fit))
 
 bwplot(resamp, metric = "RMSE")
 ```
